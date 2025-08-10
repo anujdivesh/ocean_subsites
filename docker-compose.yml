@@ -1,0 +1,41 @@
+services:
+  main-nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "80:80"
+    depends_on:
+      - plugin-nginx
+      - main-app
+
+  plugin-nginx:
+    image: nginx:latest
+    volumes:
+      - ./plugin/nginx.conf:/etc/nginx/nginx.conf
+    expose:
+      - "80"
+    depends_on:
+      - plugin-dashboard
+      - plugin-reports
+      - plugin-settings
+
+  plugin-dashboard:
+    build: ./plugin/dashboard
+    expose:
+      - "3000"
+
+  plugin-reports:
+    build: ./plugin/reports
+    expose:
+      - "3001"
+
+  plugin-settings:
+    build: ./plugin/settings
+    expose:
+      - "3002"
+
+  main-app:
+    build: ./main-app
+    expose:
+      - "3000"
