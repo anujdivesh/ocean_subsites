@@ -3,39 +3,23 @@ services:
     image: nginx:latest
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/sites:/etc/nginx/sites
+      - ./html:/usr/share/nginx/html
+      - /dev/null:/etc/nginx/conf.d/default.conf
     ports:
-      - "80:80"
+      - "8081:80"
     depends_on:
-      - plugin-nginx
-      - main-app
+      - plugin-site1
+      - plugin-site2
 
-  plugin-nginx:
-    image: nginx:latest
-    volumes:
-      - ./plugin/nginx.conf:/etc/nginx/nginx.conf
+  plugin-site1:
+    build: ./plugin/site1
     expose:
       - "80"
-    depends_on:
-      - plugin-dashboard
-      - plugin-reports
-      - plugin-settings
+    container_name: plugin-site1
 
-  plugin-dashboard:
-    build: ./plugin/dashboard
+  plugin-site2:
+    build: ./plugin/site2
     expose:
-      - "3000"
-
-  plugin-reports:
-    build: ./plugin/reports
-    expose:
-      - "3001"
-
-  plugin-settings:
-    build: ./plugin/settings
-    expose:
-      - "3002"
-
-  main-app:
-    build: ./main-app
-    expose:
-      - "3000"
+      - "80"
+    container_name: plugin-site2
