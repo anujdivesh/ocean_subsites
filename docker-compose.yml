@@ -7,7 +7,7 @@ services:
       - ./html:/usr/share/nginx/html
       - /dev/null:/etc/nginx/conf.d/default.conf
     ports:
-      - "8081:80"
+      - "8085:80"
     depends_on:
       - plugin-site1
       - plugin-site2
