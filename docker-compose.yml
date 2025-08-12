@@ -11,6 +11,7 @@ services:
     depends_on:
       - plugin-site1
       - plugin-site2
+      - plugin-widget1
 
   plugin-site1:
     build: ./plugin/site1
@@ -23,3 +24,9 @@ services:
     expose:
       - "80"
     container_name: plugin-site2
+
+  plugin-widget1:
+    build: ./plugin/widget1
+    expose:
+      - "80"
+    container_name: plugin-widget1
