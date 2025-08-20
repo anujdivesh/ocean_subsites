@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import ThemeToggle from './ThemeToggle';
 export default function Header({ theme, toggleTheme }) {
   return (
-    <nav className="navbar navbar-expand-lg py-2" style={{ 
+  <nav className="navbar navbar-expand-lg py-2" data-theme={theme} style={{ 
       backgroundColor: 'var(--color-surface)', 
       borderBottom: '1px solid var(--color-border, #e2e8f0)',
       boxShadow: 'var(--card-shadow)',
@@ -23,7 +23,7 @@ export default function Header({ theme, toggleTheme }) {
             }}
           />
           <span style={{ color: '#0065f8', fontWeight: 'bold', fontSize: '1.1rem' }}>
-            Portal Name
+            Experts
           </span>
         </Link>
 
@@ -59,26 +59,12 @@ export default function Header({ theme, toggleTheme }) {
 
           {/* Right side - Navigation Links and Theme Toggle */}
           <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
-            <li className="nav-item">
+            {/* <li className="nav-item">
               <Link className="nav-link" to="/" style={{ color: 'var(--color-text)' }}>
                 Home
               </Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/link1" style={{ color: 'var(--color-text)' }}>
-                Link 1
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/link2" style={{ color: 'var(--color-text)' }}>
-                Link 2
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/link3" style={{ color: 'var(--color-text)' }}>
-                Link 3
-              </Link>
-            </li>
+            </li> */}
+         
             <li className="nav-item d-flex align-items-center ms-3">
               <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
             </li>
