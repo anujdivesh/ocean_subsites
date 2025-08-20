@@ -7,8 +7,12 @@ WORKDIR /app
 # Copy package files first (for better caching)
 COPY package*.json ./
 
-# Install ALL dependencies needed for build (including dev if any) then prune later
-RUN npm ci
+# Install dependencies (ci if lock file, else install) including dev to allow build, prune later
+RUN if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then \
+			echo "Using npm ci (lock file detected)" && npm ci; \
+		else \
+			echo "No lock file found; using npm install (non-reproducible)" && npm install; \
+		fi
 
 # Copy all source files
 COPY . .
@@ -16,8 +20,8 @@ COPY . .
 # Build the React application (will place assets in /app/build)
 RUN npm run build
 
-# Optionally remove dev dependencies to shrink final image layer snapshot
-RUN npm prune --production
+# Remove dev dependencies to shrink final image
+RUN npm prune --production || true
 
 # Production stage: Use nginx to serve the built files
 FROM nginx:alpine
