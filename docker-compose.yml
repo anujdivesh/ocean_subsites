@@ -13,6 +13,7 @@ services:
       - plugin-site2
       - plugin-widget1
       - plugin-widget2
+      - plugin-widget3
 
   plugin-site1:
     build: ./plugin/site1
@@ -36,3 +37,8 @@ services:
     expose:
       - "80"
     container_name: plugin-widget2
+  plugin-widget3:
+    build: ./plugin/widget3
+    expose:
+      - "80"
+    container_name: plugin-widget3
