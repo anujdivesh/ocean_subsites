@@ -4,7 +4,6 @@ import { FaWaveSquare, FaArrowLeft } from 'react-icons/fa';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, LineElement, PointElement, LinearScale, TimeScale, Tooltip, Legend, Filler, CategoryScale } from 'chart.js';
 import 'chartjs-adapter-date-fns';
-import { format } from 'date-fns';
 import Lottie from 'lottie-react';
 import animationData from './live.json';
 import './Dashboard.css';
@@ -451,19 +450,29 @@ export default function RealtimeComponent({ selectedStations, setDashboardGenera
                 x: { 
                     type: 'time',
                     time: { 
-                        tooltipFormat: "dd MMM yyyy HH 'UTC'", 
-                        displayFormats: { minute: 'dd MMM yyyy HH', hour: 'dd MMM yyyy HH', day: 'dd MMM yyyy HH', month: 'MMM yyyy' }
+                        tooltipFormat: "yyyy-MM-dd HH:mm:ss", 
+                        displayFormats: { 
+                            minute: 'yyyy-MM-dd HH:mm', 
+                            hour: 'yyyy-MM-dd HH:mm', 
+                            day: 'yyyy-MM-dd HH:mm', 
+                            month: 'yyyy-MM-dd'
+                        }
                     },
                     adapters: { date: { zone: 'utc' } },
-                    title: { display: true, text: 'Time (UTC)', color: textColor },
+                    title: { display: true, text: 'Time', color: textColor },
                     ticks: { 
                         color: textColor, 
-                        maxRotation: selectedStations.length === 1 ? 0 : 45, 
-                        minRotation: selectedStations.length === 1 ? 0 : 45, 
+                        maxRotation: 45, 
+                        minRotation: 45, 
                         font: { size: selectedStations.length === 1 ? 12 : 10 }, 
                         callback: (val, idx, ticks) => {
                             const v = ticks[idx].value; // epoch ms
-                            try { return format(new Date(v), 'dd MMM yyyy HH'); } catch { return ''; }
+                            try { 
+                                const date = new Date(v);
+                                return date.toISOString().replace('T', ' ').replace('.000Z', '');
+                            } catch { 
+                                return ''; 
+                            }
                         } 
                     },
                     grid: { color: gridColor }

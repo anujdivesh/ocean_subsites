@@ -34,6 +34,7 @@ const countryConfigs = [
   { name: 'Tonga', id: 212, color: '#0984e3', center: [-21.179, -175.1982] },
   { name: 'Niue', id: 158, color: '#00b894', center: [-19.054445, -169.867233] },
   { name: 'Samoa', id: 183, color: '#6c5ce7', center: [-13.759, -172.1046] },
+  // { name: 'Australia', id: 14, color: '#272323ff', center: [-25.2744, 133.7751] },
 ];
 
 export default function Home() {
@@ -73,21 +74,37 @@ export default function Home() {
   }, []);
 
   const buildApiUrl = () => {
-    let url = 'https://oceanexpert.org/api/v1/advancedSearch/search.json?';
-    url += `type[]=experts&filter[]=Country+is&keywords[]=${countryConfigs[0].id}`;
-    for (let i = 1; i < countryConfigs.length; i++) {
-      url += `&toggle[]=OR&type[]=experts&filter[]=Country+is&keywords[]=${countryConfigs[i].id}`;
-    }
-    url += '&action=advSearch&limit=1000';
-    return url;
+  const base = 'https://www.oceanexpert.net/api/v1/advanceSearch/search.json';
+  const params = new URLSearchParams({ action: 'advSearch' });
+
+  countryConfigs.forEach((c, i) => {
+    if (i > 0) params.append('toggle[]', 'OR'); // OR 
+    params.append('type[]', 'experts');
+    params.append('filter[]', 'Country is');
+    params.append('keywords[]', c.name); //  country name
+  });
+
+  params.append('limit', '1000');
+  return `${base}?${params.toString()}`
   };
 
   const fetchExperts = useCallback(async () => {
     try {
       setLoading(true);
+      // console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\\BUILD URL\\>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")    
+      // console.log(buildApiUrl());
+      // console.log("<<<<<<<<<<<<<<<<<<\\BUILD URL\\<<<<<<<<<<<<<<<<<<")
       const response = await fetch(buildApiUrl());
       const data = await response.json();
-      const processedExperts = data.results?.data.map(processExpertCoordinates) || [];
+      
+      // Filter experts to only include countries from our countryConfigs
+      const configCountryNames = countryConfigs.map(c => c.name.toLowerCase());
+      const filteredExperts = data.results?.data.filter(expert => {
+        const expertCountry = (expert.country || '').toLowerCase();
+        return configCountryNames.includes(expertCountry);
+      }) || [];
+      
+      const processedExperts = filteredExperts.map(processExpertCoordinates) || [];
       setExpertsData(processedExperts);
       setLoading(false);
     } catch (err) {
@@ -147,7 +164,10 @@ export default function Home() {
     const marker = L.marker([avgLat, avgLng], {
       icon: L.divIcon({
         className: 'custom-div-icon',
-        html: `<div style="position:relative;">\n<div style="position:absolute;top:-5px;left:-5px;width:50px;height:50px;background-color:${lighterColor};border-radius:50%;z-index:-1;"></div>\n<div style="background-color:${countryConfig.color};color:white;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-weight:bold;">${experts.length}</div>\n</div>`,
+               html: `<div style="position:relative;">\n<div style="position:absolute;top:-5px;left:-5px;width:50px;height:50px;background-color:${lighterColor};border-radius:50%;z-index:-1;"></div>\n
+               <div style="background-color:${countryConfig.color};color:white;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-weight:bold;">
+        ${experts.length}
+        </div>\n</div>`,
         iconSize: [40, 40],
         iconAnchor: [20, 20]
       }),
@@ -236,7 +256,8 @@ export default function Home() {
       if (layer.options?.expertData?.id_ind === expert.id_ind) {
         const icon = isHovering ? L.divIcon({
           className: 'custom-div-icon',
-          html: `<div style="background-color:${expert.color};color:white;border-radius:50%;width:50px;height:50px;display:flex;align-items:center;justify-content:center;font-weight:bold;border:3px solid white;box-shadow:0 0 10px rgba(0,0,0,0.5);">${expert.fname?.[0]}${expert.sname?.[0]}</div>`,
+          html: `<div style="background-color:${expert.color};color:white;border-radius:50%;width:50px;height:50px;display:flex;align-items:center;justify-content:center;font-weight:bold;border:3px solid white;box-shadow:0 0 10px rgba(0,0,0,0.5);">
+          ${expert.fname?.[0]}${expert.sname?.[0]}</div>`,
           iconSize: [50, 50], iconAnchor: [25, 25]
         }) : L.divIcon({
           className: 'custom-div-icon',
