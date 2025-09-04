@@ -1,9 +1,85 @@
 <html>
     <head>
-        <title>Site 2</title>
+        <title>Site 2 - Images Gallery</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 40px;
+                background-color: #f5f5f5;
+            }
+            .container {
+                max-width: 800px;
+                margin: 0 auto;
+                background: white;
+                padding: 30px;
+                border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            }
+            h1 {
+                color: #333;
+                border-bottom: 2px solid #007acc;
+                padding-bottom: 10px;
+            }
+            .image-list {
+                list-style: none;
+                padding: 0;
+            }
+            .image-item {
+                margin: 20px 0;
+                padding: 15px;
+                background: #f9f9f9;
+                border-radius: 5px;
+                border-left: 4px solid #007acc;
+            }
+            .image-item a {
+                text-decoration: none;
+                color: #007acc;
+                font-weight: bold;
+                font-size: 18px;
+            }
+            .image-item a:hover {
+                color: #005a99;
+            }
+            .image-preview {
+                margin-top: 10px;
+                max-width: 200px;
+                height: auto;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+            }
+            .description {
+                color: #666;
+                margin-top: 5px;
+                font-style: italic;
+            }
+        </style>
     </head>
     <body>
-        <h1>Site 2</h1>
-        <p>This is the second site.</p>
+        <div class="container">
+            <h1>Site 2 - Images Gallery</h1>
+            <p>Available images in the directory:</p>
+            
+            <ul class="image-list">
+                <li class="image-item">
+                    <a href="images/realtime.png" target="_blank">realtime.png</a>
+                    <div class="description">Real-time ocean monitoring image</div>
+                    <img src="images/realtime.png" alt="Realtime" class="image-preview" onerror="this.style.display='none'">
+                </li>
+                
+                <li class="image-item">
+                    <a href="images/niue-forecast.png" target="_blank">niue-forecast.png</a>
+                    <div class="description">Niue forecast visualization</div>
+                    <img src="images/niue-forecast.png" alt="Niue Forecast" class="image-preview" onerror="this.style.display='none'">
+                </li>
+            </ul>
+            
+            <hr style="margin: 30px 0;">
+            
+            <h3>Direct Image URLs:</h3>
+            <ul>
+                <li><code>http://localhost:8085/site2/images/realtime.png</code></li>
+                <li><code>http://localhost:8085/site2/images/niue-forecast.png</code></li>
+            </ul>
+        </div>
     </body>
 </html>
