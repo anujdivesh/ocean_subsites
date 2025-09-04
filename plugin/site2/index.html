@@ -74,19 +74,49 @@
             async function loadImageUrls() {
                 const imageContainer = document.getElementById('imageUrls');
                 const baseUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname.replace('/index.html', '').replace(/\/$/, '')}/images/`;
-                
-                // List of known image files (you can expand this list)
-                const imageFiles = ['realtime.png', 'niue-forecast.png'];
-                
+
                 // Clear existing content
                 imageContainer.innerHTML = '';
-                
-                // Check each image file and add to list if it exists
-                for (const filename of imageFiles) {
-                    try {
+
+                try {
+                    // Fetch Nginx autoindex HTML for the images directory
+                    const response = await fetch(baseUrl, { headers: { 'Accept': 'text/html' } });
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                    const html = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+
+                    const exts = new Set(['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp']);
+                    const links = Array.from(doc.querySelectorAll('a'))
+                        .map(a => a.getAttribute('href') || '')
+                        .filter(href => href && href !== '../' && !href.endsWith('/'));
+
+                    const imageUrls = links
+                        .map(href => new URL(href, baseUrl).href)
+                        .filter(url => exts.has((url.split('.').pop() || '').toLowerCase()));
+
+                    if (imageUrls.length === 0) {
+                        const li = document.createElement('li');
+                        li.innerHTML = '<em>No images found in directory</em>';
+                        li.style.color = '#666';
+                        imageContainer.appendChild(li);
+                        return;
+                    }
+
+                    for (const imageUrl of imageUrls) {
+                        const li = document.createElement('li');
+                        const code = document.createElement('code');
+                        code.textContent = imageUrl;
+                        li.appendChild(code);
+                        imageContainer.appendChild(li);
+                    }
+                } catch (e) {
+                    // Fallback: try known filenames if autoindex is not available
+                    console.error('Failed to load autoindex; falling back to known list', e);
+                    const fallbackFiles = ['experts.png', 'realtime.png', 'niue-forecast.png'];
+                    for (const filename of fallbackFiles) {
                         const imageUrl = baseUrl + filename;
-                        
-                        // Test if image exists by trying to load it
                         const img = new Image();
                         img.onload = function() {
                             const li = document.createElement('li');
@@ -95,25 +125,17 @@
                             li.appendChild(code);
                             imageContainer.appendChild(li);
                         };
-                        img.onerror = function() {
-                            console.log(`Image not found: ${filename}`);
-                        };
                         img.src = imageUrl;
-                        
-                    } catch (error) {
-                        console.error('Error loading image:', filename, error);
                     }
+                    setTimeout(() => {
+                        if (imageContainer.children.length === 0) {
+                            const li = document.createElement('li');
+                            li.innerHTML = '<em>No images found in directory</em>';
+                            li.style.color = '#666';
+                            imageContainer.appendChild(li);
+                        }
+                    }, 2000);
                 }
-                
-                // If no images were found, show a message
-                setTimeout(() => {
-                    if (imageContainer.children.length === 0) {
-                        const li = document.createElement('li');
-                        li.innerHTML = '<em>No images found in directory</em>';
-                        li.style.color = '#666';
-                        imageContainer.appendChild(li);
-                    }
-                }, 2000);
             }
             
             // Alternative function that dynamically discovers images by trying common extensions
