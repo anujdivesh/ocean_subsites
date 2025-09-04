@@ -70,7 +70,7 @@ export default function SearchComponent({
                 const mapped = active.map(s => ({
                     id: s.id, // numeric station id needed for timeseries endpoint
                     spotter_id: s.station_id,
-                    label: `${s.type_value} - ${s.station_id}`,
+                    label: `${s.type_value} - ${s.display_name || s.station_id}`,
                     coordinates: [s.longitude, s.latitude],
                     latest_date: null,
                     owner: s.owner,
@@ -122,10 +122,13 @@ export default function SearchComponent({
     // Recompute filtered stations when type filters change
     useEffect(() => {
         if (!selectedTypeFilters.length) {
-            setBuoyOptions(allStations);
+            // Only show active stations
+            const activeStations = allStations.filter(s => s.is_active);
+            setBuoyOptions(activeStations);
             return;
         }
-        const filtered = allStations.filter(s => selectedTypeFilters.includes(s.type_value));
+        // Filter by type and ensure only active stations are shown
+        const filtered = allStations.filter(s => s.is_active && selectedTypeFilters.includes(s.type_value));
         setBuoyOptions(filtered);
         setSelectedStations(prev => prev.filter(id => filtered.some(f => f.spotter_id === id)));
     }, [selectedTypeFilters, allStations, setBuoyOptions, setSelectedStations]);

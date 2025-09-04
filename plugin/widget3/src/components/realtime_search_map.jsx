@@ -21,9 +21,17 @@ export default function RealtimeSearchMap({ buoyOptions = [], selectedStations =
 
     const street = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 });
     const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 });
-    satellite.addTo(map); // default satellite
+    const labels = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', { 
+      maxZoom: 19,
+      pane: 'overlayPane'
+    });
+    
+    // Create satellite with labels as a layer group
+    const satelliteWithLabels = L.layerGroup([satellite, labels]);
+    
+    satelliteWithLabels.addTo(map); // default satellite with labels
 
-    L.control.layers({ 'Satellite': satellite, 'OpenStreetMap': street }, null, { position: 'topright', collapsed: true }).addTo(map);
+    L.control.layers({ 'Satellite': satelliteWithLabels, 'OpenStreetMap': street }, null, { position: 'topright', collapsed: true }).addTo(map);
 
     const footer = L.control({ position: 'bottomright' });
     footer.onAdd = () => {
