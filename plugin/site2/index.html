@@ -59,27 +59,119 @@
             <h1>Site 2 - Images Gallery</h1>
             <p>Available images in the directory:</p>
             
-            <ul class="image-list">
-                <li class="image-item">
-                    <a href="images/realtime.png" target="_blank">realtime.png</a>
-                    <div class="description">Real-time ocean monitoring image</div>
-                    <img src="images/realtime.png" alt="Realtime" class="image-preview" onerror="this.style.display='none'">
-                </li>
-                
-                <li class="image-item">
-                    <a href="images/niue-forecast.png" target="_blank">niue-forecast.png</a>
-                    <div class="description">Niue forecast visualization</div>
-                    <img src="images/niue-forecast.png" alt="Niue Forecast" class="image-preview" onerror="this.style.display='none'">
-                </li>
-            </ul>
+         
             
             <hr style="margin: 30px 0;">
             
             <h3>Direct Image URLs:</h3>
-            <ul>
-                <li><code>http://localhost:8085/site2/images/realtime.png</code></li>
-                <li><code>http://localhost:8085/site2/images/niue-forecast.png</code></li>
+            <ul id="imageUrls">
+                <!-- URLs will be populated by JavaScript -->
             </ul>
         </div>
+
+        <script>
+            // Function to automatically generate image URLs
+            async function loadImageUrls() {
+                const imageContainer = document.getElementById('imageUrls');
+                const baseUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname.replace('/index.html', '').replace(/\/$/, '')}/images/`;
+                
+                // List of known image files (you can expand this list)
+                const imageFiles = ['realtime.png', 'niue-forecast.png'];
+                
+                // Clear existing content
+                imageContainer.innerHTML = '';
+                
+                // Check each image file and add to list if it exists
+                for (const filename of imageFiles) {
+                    try {
+                        const imageUrl = baseUrl + filename;
+                        
+                        // Test if image exists by trying to load it
+                        const img = new Image();
+                        img.onload = function() {
+                            const li = document.createElement('li');
+                            const code = document.createElement('code');
+                            code.textContent = imageUrl;
+                            li.appendChild(code);
+                            imageContainer.appendChild(li);
+                        };
+                        img.onerror = function() {
+                            console.log(`Image not found: ${filename}`);
+                        };
+                        img.src = imageUrl;
+                        
+                    } catch (error) {
+                        console.error('Error loading image:', filename, error);
+                    }
+                }
+                
+                // If no images were found, show a message
+                setTimeout(() => {
+                    if (imageContainer.children.length === 0) {
+                        const li = document.createElement('li');
+                        li.innerHTML = '<em>No images found in directory</em>';
+                        li.style.color = '#666';
+                        imageContainer.appendChild(li);
+                    }
+                }, 2000);
+            }
+            
+            // Alternative function that dynamically discovers images by trying common extensions
+            async function discoverImages() {
+                const imageContainer = document.getElementById('imageUrls');
+                const baseUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname.replace('/index.html', '').replace(/\/$/, '')}/images/`;
+                
+                // Common image extensions to check
+                const extensions = ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'];
+                
+                // Common image names to check (you can add more)
+                const commonNames = [
+                    'realtime', 'niue-forecast', 'forecast', 'monitoring', 'ocean',
+                    'wave', 'tide', 'buoy', 'station', 'chart', 'graph', 'data',
+                    'image1', 'image2', 'image3', 'screenshot', 'preview'
+                ];
+                
+                const foundImages = [];
+                let checked = 0;
+                const totalChecks = commonNames.length * extensions.length;
+                
+                commonNames.forEach(name => {
+                    extensions.forEach(ext => {
+                        const filename = `${name}.${ext}`;
+                        const imageUrl = baseUrl + filename;
+                        
+                        const img = new Image();
+                        img.onload = function() {
+                            if (!foundImages.includes(imageUrl)) {
+                                foundImages.push(imageUrl);
+                                const li = document.createElement('li');
+                                const code = document.createElement('code');
+                                code.textContent = imageUrl;
+                                li.appendChild(code);
+                                imageContainer.appendChild(li);
+                            }
+                        };
+                        img.onerror = function() {
+                            // Image doesn't exist, ignore
+                        };
+                        img.onload = img.onerror = function() {
+                            checked++;
+                            if (checked === totalChecks && foundImages.length === 0) {
+                                const li = document.createElement('li');
+                                li.innerHTML = '<em>No images found in directory</em>';
+                                li.style.color = '#666';
+                                imageContainer.appendChild(li);
+                            }
+                        };
+                        img.src = imageUrl;
+                    });
+                });
+            }
+            
+            // Run when page loads
+            document.addEventListener('DOMContentLoaded', function() {
+                loadImageUrls();
+            });
+        </script>
     </body>
 </html>
