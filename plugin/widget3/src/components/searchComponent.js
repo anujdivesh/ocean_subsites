@@ -203,16 +203,38 @@ export default function SearchComponent({
 </Form.Label>
                         {loading && <div className="d-flex align-items-center"><Spinner animation="border" size="sm" className="me-2"/>Loading stations...</div>}
                         {error && <div className="text-danger small mt-2">{error}</div>}
-                        <div className="mt-2 d-flex flex-wrap gap-2">
+                        <div className="mt-2 d-flex flex-wrap gap-2" style={{maxWidth:'100%'}}>
                             {selectedStations.map(id => (
-                                <Badge key={id} pill bg="primary" className="d-flex align-items-center" style={{fontSize:'1rem',background:'var(--color-primary,#2563eb)',color:'var(--color-on-primary,#fff)',boxShadow:'0 2px 8px rgba(0,0,0,0.08)'}}>
-                                    {getStationDetails(id).label}
-                                                                        <FaTimes
-                                                                            className="ms-2 remove-station-icon"
-                                                                            style={{cursor:'pointer',fontSize:'1.1em',opacity:0.9,color:'#ef4444'}}
-                                                                            onClick={()=>removeStation(id)}
-                                                                            title="Remove"
-                                                                        />
+                                <Badge
+                                    key={id}
+                                    pill
+                                    bg="primary"
+                                    className="d-inline-flex align-items-center"
+                                    style={{
+                                        fontSize:'1rem',
+                                        background:'var(--color-primary,#2563eb)',
+                                        color:'var(--color-on-primary,#fff)',
+                                        boxShadow:'0 2px 8px rgba(0,0,0,0.08)',
+                                        maxWidth:'100%',
+                                        overflow:'hidden'
+                                    }}
+                                    title={getStationDetails(id).label}
+                                >
+                                    <span style={{
+                                        overflow:'hidden',
+                                        textOverflow:'ellipsis',
+                                        whiteSpace:'nowrap',
+                                        minWidth:0,
+                                        flex:'1 1 auto'
+                                    }}>
+                                        {getStationDetails(id).label}
+                                    </span>
+                                    <FaTimes
+                                        className="ms-2 remove-station-icon"
+                                        style={{cursor:'pointer',fontSize:'1.1em',opacity:0.9,color:'#ef4444',flex:'0 0 auto'}}
+                                        onClick={()=>removeStation(id)}
+                                        title="Remove"
+                                    />
                                 </Badge>
                             ))}
                             {!selectedStations.length && !loading && <span className="small" style={{color:'var(--color-text)',opacity:0.6}}>None selected yet</span>}
@@ -221,7 +243,7 @@ export default function SearchComponent({
                     </div>
                 </div>
                 <div style={{flex:2,minWidth:0,marginLeft:'356px'}}>
-                    <div className="rounded card-theme" style={{height:'650px',position:'relative',display:'flex',flexDirection:'column',background:'var(--color-surface)',border:'1px solid var(--color-border,#e2e8f0)',boxShadow:'0 2px 12px rgba(0,0,0,0.06)'}}>
+                    <div className="rounded card-theme" style={{height:'750px',position:'relative',display:'flex',flexDirection:'column',background:'var(--color-surface)',border:'1px solid var(--color-border,#e2e8f0)',boxShadow:'0 2px 12px rgba(0,0,0,0.06)'}}>
                         <div style={{flex:1,minHeight:0}}>
                             <Suspense fallback={<div className="p-3">Loading map...</div>}>
                                 <MapWithNoSSR
