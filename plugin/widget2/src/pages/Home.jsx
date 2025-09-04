@@ -78,19 +78,64 @@ export default function Home() {
     for (let i = 1; i < countryConfigs.length; i++) {
       url += `&toggle[]=OR&type[]=experts&filter[]=Country+is&keywords[]=${countryConfigs[i].id}`;
     }
-    url += '&action=advSearch&limit=1000';
+    url += '&action=advSearch&limit=1000&page=1';
     return url;
   };
 
   const fetchExperts = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch(buildApiUrl());
-      const data = await response.json();
-      const processedExperts = data.results?.data.map(processExpertCoordinates) || [];
+      
+      // Get country names from config for filtering
+      const configCountryNames = countryConfigs.map(c => c.name.toLowerCase());
+      let allFilteredExperts = [];
+      
+      // First request to get total page count
+      const firstResponse = await fetch(buildApiUrl());
+      const firstData = await firstResponse.json();
+      const totalPages = firstData.results?.meta?.pageCount || 1;
+      
+      // console.log(`Found ${totalPages} pages of data to process...`);
+      
+      // Process first page
+      if (firstData.results?.data) {
+        const filteredExperts = firstData.results.data.filter(expert => {
+          const expertCountry = (expert.country || '').toLowerCase();
+          return configCountryNames.includes(expertCountry);
+        });
+        allFilteredExperts = allFilteredExperts.concat(filteredExperts);
+      }
+      
+      //  more than 1 page
+      if (totalPages > 1) {
+        const pagePromises = [];
+        for (let page = 2; page <= totalPages; page++) {
+          const pageUrl = `${buildApiUrl()}&page=${page}`;
+          pagePromises.push(fetch(pageUrl).then(res => res.json()));
+        }
+        
+        const pageResults = await Promise.all(pagePromises);
+        
+        // Process each page and filter by country
+        pageResults.forEach(pageData => {
+          if (pageData.results?.data) {
+            const filteredExperts = pageData.results.data.filter(expert => {
+              const expertCountry = (expert.country || '').toLowerCase();
+              return configCountryNames.includes(expertCountry);
+            });
+            allFilteredExperts = allFilteredExperts.concat(filteredExperts);
+          }
+        });
+      }
+      
+      console.log(`Found ${allFilteredExperts.length} experts from configured countries`);
+      
+      // Process all filtered experts through coordinate processing
+      const processedExperts = allFilteredExperts.map(processExpertCoordinates);
       setExpertsData(processedExperts);
       setLoading(false);
     } catch (err) {
+      console.error('Error fetching experts:', err);
       setError(err.message);
       setLoading(false);
     }

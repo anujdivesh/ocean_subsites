@@ -4,7 +4,6 @@ import { FaWaveSquare, FaArrowLeft } from 'react-icons/fa';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, LineElement, PointElement, LinearScale, TimeScale, Tooltip, Legend, Filler, CategoryScale } from 'chart.js';
 import 'chartjs-adapter-date-fns';
-import { format } from 'date-fns';
 import Lottie from 'lottie-react';
 import animationData from './live.json';
 import './Dashboard.css';
@@ -64,11 +63,11 @@ export default function RealtimeComponent({ selectedStations, setDashboardGenera
         setStationData(map);
     }, [selectedStations, buoyOptions, sharedCountryMap]);
 
-    // New generic fetch for insitu station timeseries using numeric id from API
-    const fetchInsituData = useCallback(async (numericId, limit, reason = '') => {
+    // New generic fetch for insitu station timeseries using station_id from API
+    const fetchInsituData = useCallback(async (stationId, limit, reason = '') => {
         try {
-            const url = `https://ocean-obs-api.spc.int/insitu/get_data/station/${numericId}?limit=${limit}`;
-            // console.log(`[fetchInsituData] Fetching station ${numericId} with limit ${limit}. Reason: ${reason}`);
+            const url = `https://ocean-obs-api.spc.int/insitu/get_data/station/${stationId}?limit=${limit}`;
+            // console.log(`[fetchInsituData] Fetching station ${stationId} with limit ${limit}. Reason: ${reason}`);
             
             // Create AbortController for timeout
             const controller = new AbortController();
@@ -119,10 +118,10 @@ export default function RealtimeComponent({ selectedStations, setDashboardGenera
             return { data: actualData, data_labels: dataLabels };
         } catch (err) {
             if (err.name === 'AbortError') {
-                console.error(`[fetchInsituData] Request timeout for station ${numericId} after 5 minutes`);
+                console.error(`[fetchInsituData] Request timeout for station ${stationId} after 5 minutes`);
                 return { data: [], data_labels: '', isTimeout: true };
             }
-            // console.error(`[fetchInsituData] Error fetching station ${numericId}:`, err);
+            // console.error(`[fetchInsituData] Error fetching station ${stationId}:`, err);
             return null;
         }
     }, []);
@@ -138,9 +137,9 @@ export default function RealtimeComponent({ selectedStations, setDashboardGenera
         
                  await Promise.all(selectedStations.map(async spotterId => {
              const station = getStationDetails(spotterId);
-             const numericId = station.id; // added in searchComponent mapping
-             if (!numericId) {
-                 // Handle case where station has no numeric ID
+             const stationId = station.spotter_id; // use station_id instead of numeric id
+             if (!stationId) {
+                 // Handle case where station has no station ID
                  const metaBase = stationData[spotterId] || {};
                  if (!metaBase.country_short && sharedCountryMap[spotterId]) {
                      metaBase.country_short = (sharedCountryMap[spotterId]||'').toUpperCase();
@@ -156,7 +155,7 @@ export default function RealtimeComponent({ selectedStations, setDashboardGenera
                  return;
              }
              
-             const data = await fetchInsituData(numericId, dataLimit, `initializeChartData - Live: ${liveMode}`);
+             const data = await fetchInsituData(stationId, dataLimit, `initializeChartData - Live: ${liveMode}`);
              
              // Create base chart data structure for all cases
              const metaBase = stationData[spotterId] || {};
@@ -200,7 +199,20 @@ export default function RealtimeComponent({ selectedStations, setDashboardGenera
             const timeKey = labelsArr.find(l => l.toLowerCase() === 'time') || 'time';
             const yKeys = labelsArr.filter(l => l.toLowerCase() !== 'time');
             // Build traces dynamically
-            const times = rows.map(r => r[timeKey]);
+            const times = rows.map(entry => {
+                const time = entry[timeKey];
+                // If time is ISO string, strip seconds and always append 'Z'
+                if (typeof time === 'string') {
+                    // Match "T12:34:56", "T12:34:56.789", "T12:34", etc.
+                    // Remove seconds, keep "T12:34", and add 'Z' at the end
+                    const match = time.match(/^(.+T\d{2}:\d{2})/);
+                    const base = match ? match[1] : time;
+                    return base + 'Z';
+                }
+                // If time is a Date object, format as "YYYY-MM-DDTHH:MMZ"
+                const date = new Date(time);
+                return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}T${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}Z`;
+            });
             // Using Date objects directly for Chart.js time scale
             const datasets = yKeys.map((k, idx) => ({
                 key: k,
@@ -396,7 +408,7 @@ export default function RealtimeComponent({ selectedStations, setDashboardGenera
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false }, tooltip: { enabled: false } },
                 scales: {
-                    x: { type: 'time', title: { display: true, text: 'Time', color: textColor }, grid: { color: gridColor }, ticks: { color: textColor, font: { size: 10 } } },
+                    x: { type: 'time', title: { display: true, text: 'Time (UTC)', color: textColor }, grid: { color: gridColor }, ticks: { color: textColor, font: { size: 10 } } },
                     y: { title: { display: true, text: 'No Data', color: textColor }, grid: { color: gridColor }, ticks: { color: textColor } }
                 }
             };
@@ -451,19 +463,29 @@ export default function RealtimeComponent({ selectedStations, setDashboardGenera
                 x: { 
                     type: 'time',
                     time: { 
-                        tooltipFormat: "dd MMM yyyy HH 'UTC'", 
-                        displayFormats: { minute: 'dd MMM yyyy HH', hour: 'dd MMM yyyy HH', day: 'dd MMM yyyy HH', month: 'MMM yyyy' }
+                        tooltipFormat: "yyyy-MM-dd HH:mm:ss", 
+                        displayFormats: { 
+                            minute: 'yyyy-MM-dd HH:mm', 
+                            hour: 'yyyy-MM-dd HH:mm', 
+                            day: 'yyyy-MM-dd HH:mm', 
+                            month: 'yyyy-MM-dd'
+                        }
                     },
                     adapters: { date: { zone: 'utc' } },
                     title: { display: true, text: 'Time (UTC)', color: textColor },
                     ticks: { 
                         color: textColor, 
-                        maxRotation: selectedStations.length === 1 ? 0 : 45, 
-                        minRotation: selectedStations.length === 1 ? 0 : 45, 
+                        maxRotation: 45, 
+                        minRotation: 45, 
                         font: { size: selectedStations.length === 1 ? 12 : 10 }, 
                         callback: (val, idx, ticks) => {
                             const v = ticks[idx].value; // epoch ms
-                            try { return format(new Date(v), 'dd MMM yyyy HH'); } catch { return ''; }
+                            try { 
+                                const date = new Date(v);
+                                return date.toISOString().replace('T', ' ').replace('.000Z', 'Z');
+                            } catch { 
+                                return ''; 
+                            }
                         } 
                     },
                     grid: { color: gridColor }

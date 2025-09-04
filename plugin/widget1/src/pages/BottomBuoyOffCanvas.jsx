@@ -472,7 +472,7 @@ function BottomBuoyOffCanvas({ show, onHide, buoyId }) {
         bordercolor: isDarkMode ? '#44454a' : '#e2e8f0'
       },
       xaxis: { 
-        title: { text: 'Time', font: { color: isDarkMode ? '#f1f5f9' : '#1e293b' } }, 
+        title: { text: 'Time (UTC)', font: { color: isDarkMode ? '#f1f5f9' : '#1e293b' } }, 
         tickangle: -45, 
         showgrid: true,
         gridcolor: isDarkMode ? '#44454a' : '#e2e8f0',
