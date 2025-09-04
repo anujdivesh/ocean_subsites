@@ -72,6 +72,7 @@ export default function Home() {
     };
   }, []);
 
+  /*
   const buildApiUrl = () => {
     let url = 'https://oceanexpert.org/api/v1/advancedSearch/search.json?';
     url += `type[]=experts&filter[]=Country+is&keywords[]=${countryConfigs[0].id}`;
@@ -81,7 +82,9 @@ export default function Home() {
     url += '&action=advSearch&limit=1000&page=1';
     return url;
   };
+  */
 
+  /*
   const fetchExperts = useCallback(async () => {
     try {
       setLoading(true);
@@ -104,6 +107,9 @@ export default function Home() {
           return configCountryNames.includes(expertCountry);
         });
         allFilteredExperts = allFilteredExperts.concat(filteredExperts);
+        // Log cumulative experts after page 1 in final JSON shape
+        const processedAfterPage1 = allFilteredExperts.map(processExpertCoordinates);
+        console.log('Cumulative experts after page 1 (JSON):', JSON.stringify(processedAfterPage1, null, 2));
       }
       
       //  more than 1 page
@@ -117,13 +123,17 @@ export default function Home() {
         const pageResults = await Promise.all(pagePromises);
         
         // Process each page and filter by country
-        pageResults.forEach(pageData => {
+        pageResults.forEach((pageData, idx) => {
           if (pageData.results?.data) {
             const filteredExperts = pageData.results.data.filter(expert => {
               const expertCountry = (expert.country || '').toLowerCase();
               return configCountryNames.includes(expertCountry);
             });
             allFilteredExperts = allFilteredExperts.concat(filteredExperts);
+            // Log cumulative experts after this page in final JSON shape
+            const currentPageNumber = 2 + idx;
+            const processedAfterPage = allFilteredExperts.map(processExpertCoordinates);
+            console.log(`Cumulative experts after page ${currentPageNumber} (JSON):`, JSON.stringify(processedAfterPage, null, 2));
           }
         });
       }
@@ -132,10 +142,29 @@ export default function Home() {
       
       // Process all filtered experts through coordinate processing
       const processedExperts = allFilteredExperts.map(processExpertCoordinates);
+      console.log('Final experts list (JSON):', JSON.stringify(processedExperts, null, 2));
       setExpertsData(processedExperts);
       setLoading(false);
     } catch (err) {
       console.error('Error fetching experts:', err);
+      setError(err.message);
+      setLoading(false);
+    }
+  }, [processExpertCoordinates]);
+  */
+
+  const fetchExpertsFromFile = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${process.env.PUBLIC_URL || ''}/expert.json`);
+      const data = await response.json();
+      // data is expected to be an array of experts
+      const processedExperts = Array.isArray(data) ? data.map(processExpertCoordinates) : [];
+      console.log('Loaded experts from file (JSON):', JSON.stringify(processedExperts, null, 2));
+      setExpertsData(processedExperts);
+      setLoading(false);
+    } catch (err) {
+      console.error('Error loading experts from file:', err);
       setError(err.message);
       setLoading(false);
     }
@@ -272,7 +301,8 @@ export default function Home() {
     }
   }, [basemapOption]);
 
-  useEffect(() => { fetchExperts(); }, [fetchExperts]);
+  // useEffect(() => { fetchExperts(); }, [fetchExperts]);
+  useEffect(() => { fetchExpertsFromFile(); }, [fetchExpertsFromFile]);
   useEffect(() => { populateMarkers(); }, [populateMarkers]);
 
   const handleExpertHover = (expert, isHovering) => {
