@@ -16,7 +16,13 @@ export default function RealtimeSearchMap({ buoyOptions = [], selectedStations =
   // Initialize map once
   useEffect(() => {
     if (mapRef.current) return; // already initialized
-  const map = L.map('realtime-search-map', { center: [-15, 170], zoom: 3, worldCopyJump: true, attributionControl: false, doubleClickZoom: false });
+  const map = L.map('realtime-search-map', { 
+    center: [-15, 170], 
+    zoom: 3, 
+    worldCopyJump: false, 
+    attributionControl: false, 
+    doubleClickZoom: false
+  });
     mapRef.current = map;
 
     const street = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 });
@@ -71,35 +77,49 @@ export default function RealtimeSearchMap({ buoyOptions = [], selectedStations =
 
     buoyOptions.forEach(b => {
       const [rawLng, lat] = b.coordinates || [];
-      const lng = typeof rawLng === 'number' ? normalizeLongitude(rawLng) : rawLng;
-      if (typeof lat === 'number' && typeof lng === 'number') {
+      if (typeof rawLng === 'number' && typeof lat === 'number') {
+        const normalizedLon = normalizeLongitude(rawLng);
         const isSelected = selectedStations.includes(b.spotter_id);
         const baseColor = typeColors[b.type_value] || '#2563eb';
-        const marker = L.circleMarker([lat, lng], {
-          radius: isSelected ? 10 : 6,
-          color: isSelected ? '#ffffff' : baseColor,
-          weight: isSelected ? 3 : 2,
-          fillOpacity: isSelected ? 1 : 0.75,
-          fillColor: baseColor
-        }).bindPopup(`<strong>${b.label}</strong><br/>${b.type_value || ''}${isSelected ? '<br/><em>Selected</em>' : ''}`)
-          .addTo(group);
+        
+        // Create marker at normalized position
+        const createMarker = (longitude) => {
+          const marker = L.circleMarker([lat, longitude], {
+            radius: isSelected ? 10 : 6,
+            color: isSelected ? '#ffffff' : baseColor,
+            weight: isSelected ? 3 : 2,
+            fillOpacity: isSelected ? 1 : 0.75,
+            fillColor: baseColor
+          }).bindPopup(`<strong>${b.label}</strong><br/>${b.type_value || ''}${isSelected ? '<br/><em>Selected</em>' : ''}`)
+            .addTo(group);
 
-        // Double click toggles selection using functional state update to avoid stale closure
-        if (setSelectedStations) {
-          marker.on('dblclick', () => {
-            setSelectedStations(prev => {
-              const currentlySelected = prev.includes(b.spotter_id);
-              if (currentlySelected) {
-                return prev.filter(id => id !== b.spotter_id);
-              }
-              if (prev.length >= maxSelection) {
-                marker.setStyle({ color: '#ff0044', weight: 4 });
-                setTimeout(() => marker.setStyle({ color: '#ffffff', weight: 3 }), 600);
-                return prev; // no change
-              }
-              return [...prev, b.spotter_id];
+          // Double click toggles selection
+          if (setSelectedStations) {
+            marker.on('dblclick', () => {
+              setSelectedStations(prev => {
+                const currentlySelected = prev.includes(b.spotter_id);
+                if (currentlySelected) {
+                  return prev.filter(id => id !== b.spotter_id);
+                }
+                if (prev.length >= maxSelection) {
+                  marker.setStyle({ color: '#ff0044', weight: 4 });
+                  setTimeout(() => marker.setStyle({ color: '#ffffff', weight: 3 }), 600);
+                  return prev; // no change
+                }
+                return [...prev, b.spotter_id];
+              });
             });
-          });
+          }
+          return marker;
+        };
+        
+        // Create primary marker
+        createMarker(normalizedLon);
+        
+        // Create duplicate marker on opposite side of dateline for points near IDL
+        if (Math.abs(normalizedLon) > 150) {
+          const duplicateLon = normalizedLon > 0 ? normalizedLon - 360 : normalizedLon + 360;
+          createMarker(duplicateLon);
         }
       }
     });
