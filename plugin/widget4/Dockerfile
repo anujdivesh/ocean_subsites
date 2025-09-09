@@ -7,12 +7,13 @@ WORKDIR /app
 # Copy package files first (for better caching)
 COPY package*.json ./
 
-# Install dependencies (prefer npm ci if lock present, fallback to npm install)
+# Install dependencies (prefer npm ci; if it fails due to out-of-sync lock, fallback to npm install)
 RUN if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then \
-			echo "Using npm ci (lock file detected)" && npm ci --omit=dev; \
-		else \
-			echo "No lock file found; using npm install (non-reproducible)" && npm install --omit=dev; \
-		fi
+            echo "Lock file detected: attempting npm ci" && npm ci --omit=dev || \
+            (echo "npm ci failed; falling back to npm install --legacy-peer-deps" && npm install --omit=dev --legacy-peer-deps); \
+        else \
+            echo "No lock file found; using npm install --legacy-peer-deps" && npm install --omit=dev --legacy-peer-deps; \
+        fi
 
 # Copy all source files
 COPY . .
