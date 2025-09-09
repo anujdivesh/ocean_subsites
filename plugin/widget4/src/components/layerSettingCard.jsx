@@ -158,7 +158,7 @@ const LayerSettingsCard = ({ layerId, onSettingsChange, onApply }) => {
          */}
 
         {/* Color Range (Min/Max) */}
-        <div style={{ marginBottom: '20px' }}>
+        {/* <div style={{ marginBottom: '20px' }}>
           <Form.Label style={{ color: 'var(--color-text)' }}>Color Range</Form.Label>
           <div style={{ display: 'flex', gap: '10px' }}>
             <Form.Control
@@ -176,7 +176,7 @@ const LayerSettingsCard = ({ layerId, onSettingsChange, onApply }) => {
               placeholder="Max"
             />
           </div>
-        </div>
+        </div> */}
 
         {/* Legend Image */}
         {layerData.legend_url && (

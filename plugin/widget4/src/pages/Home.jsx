@@ -170,7 +170,7 @@ return (
       <div style={{ width: 360 }}>
         <label style={{ display: 'block', marginBottom: 8, fontWeight: 'bold', color: 'var(--color-text)' }}>
           Product
-        </label>
+      </label>
         <TreeSelect
           id="product-tree"
           value={selectedNodeKeys}
