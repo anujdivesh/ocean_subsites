@@ -30,7 +30,7 @@ function App() {
   const toggleTheme = () => setTheme(t => (t === 'light' ? 'dark' : 'light'));
 
   return (
-    <Router basename="/widget2">
+    <Router basename="/widget4">
       <div style={{ 
         backgroundColor: 'var(--color-background)', 
         minHeight: '100vh',
