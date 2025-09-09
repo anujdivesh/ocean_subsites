@@ -23,7 +23,7 @@ export default function Header({ theme, toggleTheme }) {
             }}
           />
           <span style={{ color: '#0065f8', fontWeight: 'bold', fontSize: '1.1rem' }}>
-            OCOF
+          Ocean and climate outlook forum
           </span>
         </Link>
 

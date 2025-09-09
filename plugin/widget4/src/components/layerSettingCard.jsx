@@ -101,7 +101,7 @@ const LayerSettingsCard = ({ layerId, onSettingsChange, onApply }) => {
 
       <Card.Body className="bg-theme-surface" style={{ color: 'var(--color-text)' }}>
         {/* Opacity Control */}
-        <div style={{ marginBottom: '20px' }}>
+        {/* <div style={{ marginBottom: '20px' }}>
           <Form.Label style={{ color: 'var(--color-text)' }}>Opacity: {settings.opacity}%</Form.Label>
           <Form.Range
             min={0}
@@ -109,15 +109,18 @@ const LayerSettingsCard = ({ layerId, onSettingsChange, onApply }) => {
             value={settings.opacity}
             onChange={(e) => handleSettingChange('opacity', parseInt(e.target.value))}
           />
-        </div>
+        </div> */}
 
         {/* Date/Time Controls using DateSelector */}
         <DateSelector
           item={{ layer_information: layerData }}
+          period={layerData?.datetime_format}
+          startDateStr={layerData?.timeIntervalStart}
+          endDateStr={layerData?.timeIntervalEnd}
           onDateChange={(dateInfo) => {
             setSettings(prev => ({
               ...prev,
-              selectedDate: dateInfo.timeIntervalEnd,
+              selectedDate: dateInfo.currentDate,
               timeRange: {
                 start: dateInfo.timeIntervalStart,
                 end: dateInfo.timeIntervalEnd
@@ -126,7 +129,7 @@ const LayerSettingsCard = ({ layerId, onSettingsChange, onApply }) => {
             if (onSettingsChange) {
               onSettingsChange({
                 ...settings,
-                selectedDate: dateInfo.timeIntervalEnd,
+                selectedDate: dateInfo.currentDate,
                 timeRange: {
                   start: dateInfo.timeIntervalStart,
                   end: dateInfo.timeIntervalEnd
@@ -155,7 +158,7 @@ const LayerSettingsCard = ({ layerId, onSettingsChange, onApply }) => {
          */}
 
         {/* Color Range (Min/Max) */}
-        <div style={{ marginBottom: '20px' }}>
+        {/* <div style={{ marginBottom: '20px' }}>
           <Form.Label style={{ color: 'var(--color-text)' }}>Color Range</Form.Label>
           <div style={{ display: 'flex', gap: '10px' }}>
             <Form.Control
@@ -173,7 +176,7 @@ const LayerSettingsCard = ({ layerId, onSettingsChange, onApply }) => {
               placeholder="Max"
             />
           </div>
-        </div>
+        </div> */}
 
         {/* Legend Image */}
         {layerData.legend_url && (
@@ -190,13 +193,13 @@ const LayerSettingsCard = ({ layerId, onSettingsChange, onApply }) => {
         )}
 
         {/* Layer Type Info */}
-        <div style={{ marginBottom: '15px', padding: '10px', backgroundColor: 'var(--color-background)', borderRadius: '4px', color: 'var(--color-text)' }}>
+        {/* <div style={{ marginBottom: '15px', padding: '10px', backgroundColor: 'var(--color-background)', borderRadius: '4px', color: 'var(--color-text)' }}>
           <small>
             <strong>Type:</strong> {layerData.layer_type}<br />
-            {/* <strong>Time Series:</strong> {layerData.is_timeseries ? 'Yes' : 'No'}<br /> */}
+             <strong>Time Series:</strong> {layerData.is_timeseries ? 'Yes' : 'No'}<br /> 
             {layerData.units && <><strong>Units:</strong> {layerData.units}</>}
           </small>
-        </div>
+        </div> */}
 
         {/* Action Buttons */}
         <div style={{ display: 'flex', gap: '10px' }}>

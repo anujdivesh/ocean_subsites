@@ -15,6 +15,12 @@ services:
       - plugin-widget2
       - plugin-widget3
       - plugin-widget4
+      # - plugin-widget5
+      # - plugin-widget6
+      # - plugin-widget7
+      # - plugin-widget8
+      # - plugin-widget9
+      # - plugin-widget10
 
   plugin-site1:
     build: ./plugin/site1
@@ -48,3 +54,33 @@ services:
     expose:
       - "80"
     container_name: plugin-widget4
+  # plugin-widget5:
+  #   build: ./plugin/widget5
+  #   expose:
+  #     - "80"
+  #   container_name: plugin-widget5
+  # plugin-widget6:
+  #   build: ./plugin/widget6
+  #   expose:
+  #     - "80"
+  #   container_name: plugin-widget6
+  # plugin-widget7:
+  #   build: ./plugin/widget7
+  #   expose:
+  #     - "80"
+  #   container_name: plugin-widget7
+  # plugin-widget8:
+  #   build: ./plugin/widget8
+  #   expose:
+  #     - "80"
+  #   container_name: plugin-widget8
+  # plugin-widget9:
+  #   build: ./plugin/widget9
+  #   expose:
+  #     - "80"
+  #   container_name: plugin-widget9
+  # plugin-widget10:
+  #   build: ./plugin/widget10
+  #   expose:
+  #     - "80"
+  #   container_name: plugin-widget10

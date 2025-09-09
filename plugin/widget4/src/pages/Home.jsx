@@ -3,7 +3,7 @@ import { Spinner } from 'react-bootstrap';
 import Select from 'react-select';
 import { TreeSelect } from 'primereact/treeselect';
 import LayerSettingsCard from '../components/layerSettingCard'; 
-
+import {getDateFromArray, formatDateToISOWithoutMilliseconds,getDay,formatDateToISOWithoutMilliseconds3Monthly} from '../components/helper';
 
 
 
@@ -26,7 +26,8 @@ const Home = () => {
   // Use cache toggle similar to DynamicImage component
   const [useCache, setUseCache] = useState(true);
 
-  const sanitizeLabel = (text) => String(text || '').replace(/\]/g, '').replace(/\[/g, '');
+  // const sanitizeLabel = (text) => String(text || '').replace(/\]/g, '').replace(/\[/g, '');
+  const sanitizeLabel = (text) => String(text || '').replace(/\]/g, '').replace(/\[/g, '').replace(/\{\d+\}/g, '').replace(/\{\{\d+\}\}/g, '');
   
   useEffect(() => {
     fetch(URL_COUNTRY)
@@ -150,6 +151,9 @@ return (
     {/* Top row: Country (left/red), Product (right/blue) */}
     <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 16 }}>
       <div style={{ width: 260 }}>
+        <label style={{ display: 'block', marginBottom: 8, fontWeight: 'bold', color: 'var(--color-text)' }}>
+          Country
+        </label>
         <Select
           inputId="country-select"
           options={options}
@@ -164,6 +168,9 @@ return (
         />
       </div>
       <div style={{ width: 360 }}>
+        <label style={{ display: 'block', marginBottom: 8, fontWeight: 'bold', color: 'var(--color-text)' }}>
+          Product
+      </label>
         <TreeSelect
           id="product-tree"
           value={selectedNodeKeys}
@@ -282,12 +289,12 @@ return (
               {!mapLoading && (
                 <div style={{ marginTop: 6, textAlign: 'center' }}>
                   <a href={mapImageUrl} download={`map_${selectedCountry}_image.png`}>Download image</a>
-                </div>
-              )}
+      </div>
+    )}
             </div>
           )
         ) : (
-          <div style={{ color: 'var(--color-secondary)' }}>Choose a product and click Apply.</div>
+          <div style={{ color: 'var(--color-secondary)' }}>{/*Choose a product and click Apply.*/}</div>
         )}
       </div>
     </div>
