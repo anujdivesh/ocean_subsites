@@ -179,7 +179,7 @@ const LayerSettingsCard = ({ layerId, onSettingsChange, onApply }) => {
         </div> */}
 
         {/* Legend Image */}
-        {layerData.legend_url && (
+        {/* {layerData.legend_url && (
           <div style={{ marginBottom: '15px' }}>
             <Form.Label style={{ color: 'var(--color-text)' }}>Legend</Form.Label>
             <div>
@@ -190,7 +190,7 @@ const LayerSettingsCard = ({ layerId, onSettingsChange, onApply }) => {
               />
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Layer Type Info */}
         {/* <div style={{ marginBottom: '15px', padding: '10px', backgroundColor: 'var(--color-background)', borderRadius: '4px', color: 'var(--color-text)' }}>
