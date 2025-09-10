@@ -35,20 +35,49 @@ const LayerSettingsCard = ({ layerId, onSettingsChange, onApply }) => {
           const isMonthly = data?.datetime_format === 'MONTHLY';
           const is3MonthlySeasonal = data?.datetime_format === '3MONTHLY_SEASONAL';
           const is3Monthly = data?.datetime_format === '3MONTHLY';
+          const isDaily = data?.datetime_format === 'DAILY';
           
-          console.log('LayerSettingsCard - API data:', {
-            datetime_format: data?.datetime_format,
-            timeIntervalStart: data?.timeIntervalStart,
-            timeIntervalEnd: data?.timeIntervalEnd,
-            isMonthly,
-            is3MonthlySeasonal,
-            is3Monthly
-          });
+          // console.log('LayerSettingsCard - API data:', {
+          //   datetime_format: data?.datetime_format,
+          //   timeIntervalStart: data?.timeIntervalStart,
+          //   timeIntervalEnd: data?.timeIntervalEnd,
+          //   layer_type: data?.layer_type,
+          //   layer_id: layerId,
+          //   isMonthly,
+          //   is3MonthlySeasonal,
+          //   is3Monthly,
+          //   isDaily
+          // });
           
-          // For MONTHLY, 3MONTHLY and 3MONTHLY_SEASONAL, use timeIntervalEnd (last available date) instead of timeIntervalStart
-          const initialDate = (isMonthly || is3MonthlySeasonal || is3Monthly) ? (data.timeIntervalEnd || data.timeIntervalStart || '') : (data.timeIntervalStart || '');
+          // Determine initial date based on format and layer characteristics
+          let initialDate;
+          if (isDaily) {
+            // For DAILY format, check if it's a forecast layer
+            if (data?.layer_type === "WMS_FORECAST") {
+              // Forecast layers typically use start date
+              initialDate = data.timeIntervalStart || data.timeIntervalEnd || '';
+            } else {
+              // For non-forecast DAILY layers, use end date (most recent data)
+              initialDate = data.timeIntervalEnd || data.timeIntervalStart || '';
+            }
+          } else if (isMonthly) {
+            // For MONTHLY format, check if it's a forecast layer or has specific characteristics
+            if (data?.layer_type === "WMS_FORECAST") {
+              // Forecast layers typically use start date
+              initialDate = data.timeIntervalStart || data.timeIntervalEnd || '';
+            } else {
+              // For non-forecast MONTHLY layers, use end date (most recent data)
+              initialDate = data.timeIntervalEnd || data.timeIntervalStart || '';
+            }
+          } else if (is3MonthlySeasonal || is3Monthly) {
+            // For 3MONTHLY and 3MONTHLY_SEASONAL, always use end date
+            initialDate = data.timeIntervalEnd || data.timeIntervalStart || '';
+          } else {
+            // For other formats, use start date
+            initialDate = data.timeIntervalStart || '';
+          }
           
-          console.log('LayerSettingsCard - Setting initialDate:', initialDate);
+          // console.log('LayerSettingsCard - Setting initialDate:', initialDate);
           
           setSettings(prev => ({
             ...prev,
@@ -227,7 +256,7 @@ const LayerSettingsCard = ({ layerId, onSettingsChange, onApply }) => {
               if (onApply) {
                 onApply({ layerId, settings });
               } else {
-                console.log('Apply settings:', settings);
+                // console.log('Apply settings:', settings);
               }
             }}
           >
@@ -236,7 +265,7 @@ const LayerSettingsCard = ({ layerId, onSettingsChange, onApply }) => {
           <Button 
             variant="outline-secondary" 
             size="sm"
-            onClick={() => console.log('Reset settings')}
+            onClick={() => {/* console.log('Reset settings') */}}
           >
             Reset
           </Button>
