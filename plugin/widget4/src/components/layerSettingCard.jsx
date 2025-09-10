@@ -33,9 +33,26 @@ const LayerSettingsCard = ({ layerId, onSettingsChange, onApply }) => {
           
           // Initialize settings with API data
           const isMonthly = data?.datetime_format === 'MONTHLY';
+          const is3MonthlySeasonal = data?.datetime_format === '3MONTHLY_SEASONAL';
+          const is3Monthly = data?.datetime_format === '3MONTHLY';
+          
+          console.log('LayerSettingsCard - API data:', {
+            datetime_format: data?.datetime_format,
+            timeIntervalStart: data?.timeIntervalStart,
+            timeIntervalEnd: data?.timeIntervalEnd,
+            isMonthly,
+            is3MonthlySeasonal,
+            is3Monthly
+          });
+          
+          // For MONTHLY, 3MONTHLY and 3MONTHLY_SEASONAL, use timeIntervalEnd (last available date) instead of timeIntervalStart
+          const initialDate = (isMonthly || is3MonthlySeasonal || is3Monthly) ? (data.timeIntervalEnd || data.timeIntervalStart || '') : (data.timeIntervalStart || '');
+          
+          console.log('LayerSettingsCard - Setting initialDate:', initialDate);
+          
           setSettings(prev => ({
             ...prev,
-            selectedDate: data.timeIntervalStart || '',
+            selectedDate: initialDate,
             timeRange: {
               start: data.timeIntervalStart || '',
               end: data.timeIntervalEnd || ''
