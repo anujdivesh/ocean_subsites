@@ -10,21 +10,41 @@ export default function Header({ theme, toggleTheme }) {
     }}>
       <div className="container-fluid">
         {/* Logo */}
-        <Link className="navbar-brand d-flex align-items-center" to="/">
-          <img 
-            src={process.env.PUBLIC_URL + '/COSPPaC_white_crop2.png'} 
-            alt="COSPPaC Logo" 
-            height="30" 
-            className="d-inline-block align-text-top me-2"
-            style={{ 
-              filter: 'brightness(0) saturate(100%) invert(15%) sepia(100%) saturate(10000%) hue-rotate(210deg) brightness(100%) contrast(100%)',
-              transition: 'filter 0.3s ease'
-            }}
-          />
-          <span style={{ color: '#0065f8', fontWeight: 'bold', fontSize: '1.1rem' }}>
-            Real-Time Ocean Monitoring
-          </span>
-        </Link>
+        <div className="navbar-brand d-flex align-items-center">
+          <Link to="/" className="d-flex align-items-center text-decoration-none me-3">
+            <img 
+              src={process.env.PUBLIC_URL + '/COSPPaC_white_crop2.png'} 
+              alt="COSPPaC Logo" 
+              height="30" 
+              className="d-inline-block align-text-top me-2"
+              style={{ 
+                filter: 'brightness(0) saturate(100%) invert(15%) sepia(100%) saturate(10000%) hue-rotate(210deg) brightness(100%) contrast(100%)',
+                transition: 'filter 0.3s ease'
+              }}
+            />
+          </Link>
+          <div style={{ color: '#60a5fa', fontWeight: 'bold', fontSize: '1.1rem', position: 'relative', zIndex: 10 }}>
+            <a 
+              style={{
+                textDecoration: 'none', 
+                color: 'inherit', 
+                cursor: 'pointer', 
+                display: 'inline-block',
+                position: 'relative',
+                zIndex: 11,
+                padding: '2px 4px',
+                borderRadius: '2px'
+              }} 
+              href="https://oceanportal2.spc.int" 
+              target="_blank" 
+              rel="noopener noreferrer"
+            >
+              Pacific Ocean Portal
+            </a> 
+            <span style={{margin: '0 8px'}}>-</span>
+            <Link style={{textDecoration: 'none', color: 'inherit'}} to="/">Real-Time Ocean Monitoring</Link>
+          </div>
+        </div>
 
         {/* Mobile Toggle Button */}
         <button 

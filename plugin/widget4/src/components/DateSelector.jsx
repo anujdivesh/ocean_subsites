@@ -40,7 +40,7 @@ function DateSelector({ item, period, startDateStr, endDateStr, onDateChange }) 
   // Function to handle date changes
   const handleChange = (selectedDate, item) => {
     if (item.layer_information.datetime_format === 'MONTHLY') {
-      console.log('MONTHLY2');
+      // console.log('MONTHLY2');
       if (spec !== "") {
         var exactDate = getDateFromArray(dateArray.current, selectedDate.getFullYear(), selectedDate.getMonth() + 1);
         const dateString = `${exactDate.getFullYear()}-${String(exactDate.getMonth() + 1).padStart(2, '0')}-${String(exactDate.getDate()).padStart(2, '0')}T${String(exactDate.getHours()).padStart(2, '0')}:${String(exactDate.getUTCMinutes()).padStart(2, '0')}:${String(exactDate.getUTCSeconds()).padStart(2, '0')}.000Z`;
@@ -64,7 +64,7 @@ function DateSelector({ item, period, startDateStr, endDateStr, onDateChange }) 
         }
       }
     } else if (item.layer_information.datetime_format === 'WEEKLY') {
-      console.log('WEEKLY2');
+      // console.log('WEEKLY2');
       // Accept either index (number/string) or raw date string from specific_timestemps
       let indexCandidate = null;
       let raw = null;
@@ -92,7 +92,7 @@ function DateSelector({ item, period, startDateStr, endDateStr, onDateChange }) 
 
       const dateWithZ = raw.endsWith('Z') ? raw : `${raw}Z`;
       const formattedDate = new Date(dateWithZ).toISOString().split('T')[0] + 'T00:00:00Z';
-      console.log(formattedDate)
+      // console.log(formattedDate)
       if (onDateChange) {
         onDateChange({
           currentDate: formattedDate,
@@ -127,8 +127,8 @@ function DateSelector({ item, period, startDateStr, endDateStr, onDateChange }) 
   const handleonchange3monthSeasonal = (date, item) => {
     const d = new Date(date);
     // Force midnight (00:00:00) in UTC
-    console.log(d);
-    console.log(formatDateToISOWithoutMilliseconds3Monthly(d));
+    // console.log(d);
+    // console.log(formatDateToISOWithoutMilliseconds3Monthly(d));
 
     if (onDateChange) {
       onDateChange({
@@ -142,18 +142,18 @@ function DateSelector({ item, period, startDateStr, endDateStr, onDateChange }) 
   useEffect(() => {
     if (_isMounted.current) {
       if (item.layer_information.datetime_format === 'DAILY') {
-        console.log('DAILY2');
+        // console.log('DAILY2');
         setStartDate(startDateStr);
         setEndDate(endDateStr);
         
         if (item.layer_information.layer_type === "WMS_FORECAST") {
-          console.log('DAILY2 WMS_FORECAST');
+          // console.log('DAILY2 WMS_FORECAST');
           setCurrentDate(startDateStr);
         } else {
           setCurrentDate(endDateStr);
         }
       } else if (item.layer_information.datetime_format === 'MONTHLY' || item.layer_information.datetime_format === '3MONTHLY') {
-        console.log('MONTHLY2');
+        // console.log('MONTHLY2');
         var dateTimeArray;
         if (spec !== "") {
           dateTimeArray = spec.split(',').map(timestamp => new Date(timestamp.trim()));
@@ -162,32 +162,32 @@ function DateSelector({ item, period, startDateStr, endDateStr, onDateChange }) 
         setStartDate(dateTimeArray[0]);
         setEndDate(dateTimeArray[dateTimeArray.length - 1]);
         
-        console.log('DateSelector MONTHLY/3MONTHLY - Props:', {
-          startDateStr,
-          endDateStr,
-          dateTimeArrayLength: dateTimeArray.length,
-          firstDate: dateTimeArray[0],
-          lastDate: dateTimeArray[dateTimeArray.length - 1]
-        });
+        // console.log('DateSelector MONTHLY/3MONTHLY - Props:', {
+        //   startDateStr,
+        //   endDateStr,
+        //   dateTimeArrayLength: dateTimeArray.length,
+        //   firstDate: dateTimeArray[0],
+        //   lastDate: dateTimeArray[dateTimeArray.length - 1]
+        // });
         
         // For MONTHLY and 3MONTHLY, use endDateStr if available (from layerSettingCard initialization)
         // Otherwise fall back to last date in array
         let initialDate;
         if (item.layer_information.layer_type === "WMS_FORECAST") {
-          console.log('MONTHLY2 WMS_FORECAST');
+          // console.log('MONTHLY2 WMS_FORECAST');
           initialDate = dateTimeArray[0];
         } else {
           if (endDateStr && endDateStr !== '') {
             initialDate = new Date(endDateStr);
-            console.log('DateSelector MONTHLY/3MONTHLY - Using endDateStr:', endDateStr, '-> initialDate:', initialDate);
+            // console.log('DateSelector MONTHLY/3MONTHLY - Using endDateStr:', endDateStr, '-> initialDate:', initialDate);
           } else {
             initialDate = dateTimeArray[dateTimeArray.length - 1];
-            console.log('DateSelector MONTHLY/3MONTHLY - Using fallback date:', initialDate);
+            // console.log('DateSelector MONTHLY/3MONTHLY - Using fallback date:', initialDate);
           }
         }
         setCurrentDate(initialDate);
       } else if (item.layer_information.datetime_format === 'WEEKLY_NRT') {
-        console.log('WEEKLY_NRT2');
+        // console.log('WEEKLY_NRT2');
         var weeklyNrtArray;
         if (spec !== "") {
           weeklyNrtArray = spec.split(',').map(timestamp => new Date(timestamp.trim()));
@@ -197,17 +197,17 @@ function DateSelector({ item, period, startDateStr, endDateStr, onDateChange }) 
         setEndDate(weeklyNrtArray[weeklyNrtArray.length - 1]);
         
         if (item.layer_information.layer_type === "WMS_FORECAST") {
-          console.log('WEEKLY_NRT2 WMS_FORECAST');
+          // console.log('WEEKLY_NRT2 WMS_FORECAST');
           setCurrentDate(weeklyNrtArray[0]);
         } else {
           setCurrentDate(weeklyNrtArray[weeklyNrtArray.length - 1]);
         }
       } else if (item.layer_information.datetime_format === 'HOURLY') {
-        console.log('HOURLY2');
-        console.log(endDateStr);
+        // console.log('HOURLY2');
+        // console.log(endDateStr);
         setCurrentDate(new Date(endDateStr));
       } else if (item.layer_information.datetime_format === '3MONTHLY_SEASONAL') {
-        console.log('3MONTHLY_SEASONAL2');
+        // console.log('3MONTHLY_SEASONAL2');
         let dateTimeArray = [];
         const hasSpec = typeof spec === 'string' && spec.trim() !== '';
 
@@ -237,30 +237,30 @@ function DateSelector({ item, period, startDateStr, endDateStr, onDateChange }) 
           setStartDate(dateTimeArray[0]);
           setEndDate(dateTimeArray[dateTimeArray.length - 1]);
           
-          console.log('DateSelector 3MONTHLY_SEASONAL - Props:', {
-            startDateStr,
-            endDateStr,
-            dateTimeArrayLength: dateTimeArray.length,
-            firstDate: dateTimeArray[0],
-            lastDate: dateTimeArray[dateTimeArray.length - 1]
-          });
+          // console.log('DateSelector 3MONTHLY_SEASONAL - Props:', {
+          //   startDateStr,
+          //   endDateStr,
+          //   dateTimeArrayLength: dateTimeArray.length,
+          //   firstDate: dateTimeArray[0],
+          //   lastDate: dateTimeArray[dateTimeArray.length - 1]
+          // });
           
           // For 3MONTHLY_SEASONAL, use endDateStr if available (from layerSettingCard initialization)
           // Otherwise fall back to last date in array
           let initialDate;
           if (endDateStr && endDateStr !== '') {
             initialDate = new Date(endDateStr);
-            console.log('DateSelector - Using endDateStr:', endDateStr, '-> initialDate:', initialDate);
+            // console.log('DateSelector - Using endDateStr:', endDateStr, '-> initialDate:', initialDate);
           } else {
             initialDate = item.layer_information.layer_type === "WMS_FORECAST"
               ? dateTimeArray[0]
               : dateTimeArray[dateTimeArray.length - 1];
-            console.log('DateSelector - Using fallback date:', initialDate);
+            // console.log('DateSelector - Using fallback date:', initialDate);
           }
           setCurrentDate(initialDate);
         }
       } else if (item.layer_information.datetime_format === 'WEEKLY') {
-        console.log('WEEKLY');
+        // console.log('WEEKLY');
         // For WEEKLY format, initialize to the first item (index 0)
         if (specifc_stemps && specifc_stemps.length > 0) {
           setCurrentDate(0);
@@ -294,7 +294,7 @@ function DateSelector({ item, period, startDateStr, endDateStr, onDateChange }) 
   // Content rendering based on datetime format
   let content;
   if (item.layer_information.datetime_format === 'DAILY') {
-    console.log('DAILY1');
+    // console.log('DAILY1');
     content = (
       <div style={{ width: '90%' }}>
         <DatePicker
