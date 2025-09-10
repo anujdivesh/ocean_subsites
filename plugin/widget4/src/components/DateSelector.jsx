@@ -30,8 +30,12 @@ function DateSelector({ item, period, startDateStr, endDateStr, onDateChange }) 
 
   // Initialize variables safely
   const spec = item?.layer_information?.specific_timestemps || null;
-  const specifc_stemps = item?.layer_information?.specific_timestemps && item.layer_information.specific_timestemps !== null ? item.layer_information.specific_timestemps.split(',') : null;
-  const weekRange = item?.layer_information?.interval_step && item.layer_information.interval_step !== null ? item.layer_information.interval_step.split(',') : null;
+  const specifc_stemps = item?.layer_information?.specific_timestemps && item.layer_information.specific_timestemps !== null
+    ? item.layer_information.specific_timestemps.split(',').map((s) => s.trim())
+    : null;
+  const weekRange = item?.layer_information?.interval_step && item.layer_information.interval_step !== null
+    ? item.layer_information.interval_step.split(',').map((s) => s.trim())
+    : null;
 
   // Function to handle date changes
   const handleChange = (selectedDate, item) => {
@@ -59,13 +63,39 @@ function DateSelector({ item, period, startDateStr, endDateStr, onDateChange }) 
         }
       }
     } else if (item.layer_information.datetime_format === 'WEEKLY') {
-      setCurrentDate(selectedDate);
-      
+      // Accept either index (number/string) or raw date string from specific_timestemps
+      let indexCandidate = null;
+      let raw = null;
+
+      if (typeof selectedDate === 'object' && selectedDate !== null && 'index' in selectedDate) {
+        indexCandidate = parseInt(selectedDate.index, 10);
+      } else if (/^\d+$/.test(String(selectedDate).trim())) {
+        indexCandidate = parseInt(String(selectedDate).trim(), 10);
+      } else {
+        raw = String(selectedDate || '').trim();
+      }
+
+      if (raw == null) {
+        if (Number.isNaN(indexCandidate) || !specifc_stemps || !specifc_stemps[indexCandidate]) {
+          console.warn('WEEKLY: invalid index or specific timestamps missing', { selectedDate, indexCandidate, specifc_stemps });
+          return;
+        }
+        raw = (specifc_stemps[indexCandidate] || '').trim();
+        setCurrentDate(indexCandidate);
+      } else {
+        // Try to sync currentDate to the matching index if present
+        const foundIdx = Array.isArray(specifc_stemps) ? specifc_stemps.findIndex((d) => String(d).trim() === raw) : -1;
+        if (foundIdx >= 0) setCurrentDate(foundIdx); else setCurrentDate(0);
+      }
+
+      const dateWithZ = raw.endsWith('Z') ? raw : `${raw}Z`;
+      const formattedDate = new Date(dateWithZ).toISOString().split('T')[0] + 'T00:00:00Z';
+      //console.log(formattedDate)
       if (onDateChange) {
         onDateChange({
-          currentDate: selectedDate,
-          timeIntervalStart: selectedDate,
-          timeIntervalEnd: endDateOrig.toISOString()
+          currentDate: formattedDate,
+          timeIntervalStart: formattedDate,
+          timeIntervalEnd: formattedDate
         });
       }
     } else {
@@ -95,8 +125,8 @@ function DateSelector({ item, period, startDateStr, endDateStr, onDateChange }) 
   const handleonchange3monthSeasonal = (date, item) => {
     const d = new Date(date);
     // Force midnight (00:00:00) in UTC
-    console.log(d);
-    console.log(formatDateToISOWithoutMilliseconds3Monthly(d));
+    //console.log(d);
+    //console.log(formatDateToISOWithoutMilliseconds3Monthly(d));
 
     if (onDateChange) {
       onDateChange({
@@ -133,6 +163,7 @@ function DateSelector({ item, period, startDateStr, endDateStr, onDateChange }) 
           setCurrentDate(dateTimeArray[dateTimeArray.length - 1]);
         }
       } else if (item.layer_information.datetime_format === 'WEEKLY_NRT') {
+        //console.log('WEEKLY_NRT');
         var weeklyNrtArray;
         if (spec !== "") {
           weeklyNrtArray = spec.split(',').map(timestamp => new Date(timestamp.trim()));
@@ -147,7 +178,7 @@ function DateSelector({ item, period, startDateStr, endDateStr, onDateChange }) 
           setCurrentDate(weeklyNrtArray[weeklyNrtArray.length - 1]);
         }
       } else if (item.layer_information.datetime_format === 'HOURLY') {
-        console.log(endDateStr);
+        //console.log(endDateStr);
         setCurrentDate(new Date(endDateStr));
       } else if (item.layer_information.datetime_format === '3MONTHLY_SEASONAL') {
         let dateTimeArray = [];
@@ -185,9 +216,11 @@ function DateSelector({ item, period, startDateStr, endDateStr, onDateChange }) 
           );
         }
       } else if (item.layer_information.datetime_format === 'WEEKLY') {
-        let dateWithoutZ = startDateStr.replace(/Z/g, '');
-        let index = specifc_stemps.findIndex(date => date.trim() === dateWithoutZ.trim());
-        setCurrentDate(specifc_stemps[index]);
+        //console.log('WEEKLY');
+        // For WEEKLY format, initialize to the first item (index 0)
+        if (specifc_stemps && specifc_stemps.length > 0) {
+          setCurrentDate(0);
+        }
       }
     }
     return () => { _isMounted.current = false };
@@ -355,6 +388,7 @@ function DateSelector({ item, period, startDateStr, endDateStr, onDateChange }) 
       );
     }
   } else if (item.layer_information.datetime_format === 'WEEKLY_NRT') {
+    //console.log('WEEKLY_NRT1');
     if (!dateArray.current || dateArray.current.length === 0) {
       content = <div>Loading dates...</div>;
     } else {
@@ -508,16 +542,20 @@ function DateSelector({ item, period, startDateStr, endDateStr, onDateChange }) 
       </>
     );
   } else if (item.layer_information.datetime_format === 'WEEKLY') {
+    //console.log('WEEKLY2');
     content = (
       <div style={{ width: '80%' }}>
         <select
           className="form-select form-select-sm rounded-pill"
-          value={currentDate}
-          onChange={(e) => handleChange(e.target.value, item)}
+          value={String(Number.isInteger(currentDate) ? currentDate : 0)}
+          onChange={(e) => {
+            const idx = parseInt(e.target.value, 10);
+            handleChange(idx, item);
+          }}
         >
-          {weekRange.map((item, index) => (
-            <option key={index} value={specifc_stemps[index]}>
-              {item} Week
+          {weekRange && weekRange.map((wk, index) => (
+            <option key={index} value={String(index)}>
+              {wk} Week
             </option>
           ))}
         </select>

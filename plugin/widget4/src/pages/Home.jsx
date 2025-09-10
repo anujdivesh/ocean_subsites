@@ -238,12 +238,15 @@ return (
                   if (!selectedCountry) { console.warn('No country selected'); return; }
                   const region = encodeURIComponent(String(selectedCountry));
                   const layer_map = encodeURIComponent(String(layerId));
-                  const iso = settings?.timeRange?.end || settings?.selectedDate;
+                  const iso = settings?.selectedDate || settings?.timeRange?.end || settings?.timeRange?.start;
                   if (!iso) { console.warn('No time selected'); return; }
                   const time = new Date(iso).toISOString().split('.')[0] + 'Z';
                   const cacheParam = useCache ? 'True' : 'False';
-                  const nocache = useCache ? '' : `&nocache=${Date.now()}`;
-                  const url = `https://ocean-plotter.spc.int/plotter/getMap?region=${region}&layer_map=${layer_map}&time=${time}&use_cache=${cacheParam}${nocache}&token=null`;
+                  const urlBase = `https://ocean-plotter.spc.int/plotter/getMap?region=${region}&layer_map=${layer_map}&time=${time}&use_cache=${cacheParam}&token=null`;
+                  const url = `${urlBase}&nocache=${Date.now()}`;
+                  console.log('Apply with settings:', settings);
+                  console.log('Resolved ISO:', iso);
+                  console.log('Map image URL:', url);
                   setMapError(false);
                   setMapLoading(true);
                   setMapImageUrl(url);
