@@ -244,10 +244,12 @@ function NiueForecast() {
 
   // Drag handlers for sidebar
   const handleMouseDown = (e) => {
-    if (e.target.closest('.accordion-button') || e.target.closest('.form-check')) {
-      return; // Don't start drag if clicking on accordion buttons or checkboxes
+    // Do not start dragging when interacting with form controls or interactive UI elements
+    const interactiveSelector = 'select, input, textarea, button, label, a, [role="button"], .accordion-button, .form-check, .form-select, .btn, .dropdown-toggle, .dropdown-menu';
+    if (e.target.closest(interactiveSelector) || e.target.isContentEditable) {
+      return;
     }
-    
+
     setIsDragging(true);
     const rect = sidebarRef.current.getBoundingClientRect();
     setDragOffset({

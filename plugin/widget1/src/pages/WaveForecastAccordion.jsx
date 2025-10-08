@@ -104,7 +104,6 @@ export default function WaveForecastAccordion({
           value={selectedWaveForecast}
           onChange={e => setSelectedWaveForecast(e.target.value)}
           style={smallSelect}
-          onClick={e => e.currentTarget.blur()}
         >
           {WAVE_FORECAST_LAYERS.map(layer => (
             <option key={layer.value} value={layer.value}>{layer.label}</option>
